@@ -1,94 +1,46 @@
+"use client"
+
 import Image from 'next/image'
 import styles from './page.module.css'
+import React, { useEffect, useState } from 'react';
+
+
 
 const Home = () => {
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main>
+      <div className="conveyor_belt_1">
+        <div className="conveyor_belt_1_element"><img src="/images/1.png" alt=""></img></div>
+        <div className="conveyor_belt_1_element"><img src="/images/2.png" alt=""></img></div>
+        <div className="conveyor_belt_1_element"><img src="/images/3.png" alt=""></img></div>
+        <div className="conveyor_belt_1_element"><img src="/images/4.png" alt=""></img></div>
+        <div className="conveyor_belt_1_element"><img src="/images/5.png" alt=""></img></div>
+        <div className="conveyor_belt_1_element"><img src="/images/6.png" alt=""></img></div>
+        <div className="conveyor_belt_1_element"><img src="/images/7.png" alt=""></img></div>
+        <div className="conveyor_belt_1_element"><img src="/images/8.png" alt=""></img></div>
+        <div className="conveyor_belt_1_element"><img src="/images/9.png" alt=""></img></div>
+        <div className="conveyor_belt_1_element"><img src="/images/10.png" alt=""></img></div>
+      </div>
+      <div className='main_container'>
+        <div className='main_container_1'><img src="/images/main_img.png" alt=""></img></div>
+        <div className='main_container_2'>
+          <div className='main_container_2_text'>DESTINATION OF YOUR DREAM</div>
+          <div className='main_container_2_img'><img src="/images/logo.png" alt=""></img></div>
+          <div className='main_container_2_btn'>LET'S GO</div>
         </div>
       </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+      <div className="conveyor_belt_2">
+        <div className="conveyor_belt_2_element"><img src="/images/1.png" alt=""></img></div>
+        <div className="conveyor_belt_2_element"><img src="/images/2.png" alt=""></img></div>
+        <div className="conveyor_belt_2_element"><img src="/images/3.png" alt=""></img></div>
+        <div className="conveyor_belt_2_element"><img src="/images/4.png" alt=""></img></div>
+        <div className="conveyor_belt_2_element"><img src="/images/5.png" alt=""></img></div>
+        <div className="conveyor_belt_2_element"><img src="/images/6.png" alt=""></img></div>
+        <div className="conveyor_belt_2_element"><img src="/images/7.png" alt=""></img></div>
+        <div className="conveyor_belt_2_element"><img src="/images/8.png" alt=""></img></div>
+        <div className="conveyor_belt_2_element"><img src="/images/9.png" alt=""></img></div>
+        <div className="conveyor_belt_2_element "><img src="/images/10.png" alt=""></img></div>
       </div>
     </main>
   )

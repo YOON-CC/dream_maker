@@ -1,0 +1,197 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Sans+KR&family=Jua&family=Lilita+One&family=Roboto&family=Single+Day&display=swap');
+
+$primary-color: #5C6A5E;
+
+$conveyor-count: 10;
+$conveyor-delay: 1.5s;
+
+@mixin center_position() {
+    top : 50%;
+    left : 50%;
+    transform: translate(-50%, -50%);
+}
+@mixin font_center_position() {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+body {
+    overflow: hidden;
+}
+
+.main_container{
+    // background-color: red;
+    position: absolute;
+    display: flex;
+    height: 400px;
+    width: 1200px;
+
+
+    @include center_position()
+}
+.main_container_1{
+    // background-color: rgb(74, 122, 122);
+    height: 100%;
+    width: 600px;
+
+    img{
+        height: 310px;
+        width: 600px;
+        margin-top: 40px;
+    }
+    
+}
+.main_container_2{
+    position: relative;
+    // background-color: aqua;
+    height: 100%;
+    width: 600px;
+}
+.main_container_2_text{
+    // background-color: red;
+    width: 100%;
+
+    font-size: 25px;
+    font-weight: bold;
+
+    @include font_center_position;
+
+    margin-top: 110px;
+    margin-left: -30px;
+}
+.main_container_2_img{
+    // background-color: rgb(128, 88, 88);
+    height: 45px; 
+    width: 100%;
+
+    img{
+        height: 100%;
+        width: 500px;
+        margin-left: 20px;
+    }
+    margin-top: 10px;
+}
+.main_container_2_btn{
+    position: absolute;
+    background-color: $primary-color;
+    height: 50px; 
+    width: 180px;
+
+    border-radius: 10px;
+
+    @include font_center_position;
+    color : #ffffff;
+    font-weight: bold;
+    font-size: 17px;
+    cursor: pointer;
+
+    left : 50%;
+    transform: translate(-50%, -50%);
+
+    margin-top: 80px;
+    margin-left: -25px;
+}
+
+/*@@@@@@@@@@@@@@@@@2*/
+.conveyor_belt_1 {
+    // background-color: aqua;
+    width: 120%;
+    height: 12vh;
+    overflow: hidden;
+    position: relative;
+
+    top: 50%;
+    left : 50%;
+    transform: translate(-50%, 30%);
+}
+.conveyor_belt_1_element {
+    width: 10%;
+    height: 100%;
+    // background-color: red;
+    position: absolute;
+    animation: moveLeft 15s linear infinite; /* duration을 15초로 변경 */
+    opacity: 1;
+    img{
+        position: relative;
+        height: 80%;
+        width: 40%;
+        top: 50%;
+        left : 50%;
+        transform: translate(-50%, -50%);       
+    }
+}
+
+@for $i from 1 through $conveyor-count {
+    .conveyor_belt_1_element:nth-child(#{$i}) {
+        background-color: #E7E7E7;
+        border-radius: 5px;
+        animation-delay: ($i - 1) * $conveyor-delay;
+        left: calc(100% + #{$i - 1} * 30px); /* 간격을 포함한 계산 */
+        animation-fill-mode: forwards;
+    }
+}
+
+.conveyor_belt_1_element:nth-child(1) {
+     animation-delay: 0s;
+}
+
+@keyframes moveLeft {
+    0% {
+        left: 100%;
+    }
+    100% {
+        left: -200px;
+    }
+}
+/*@@@@@@@*/
+.conveyor_belt_2 {
+    // background-color: aqua;
+    width: 120%;
+    height: 12vh;
+    overflow: hidden;
+    position: relative;
+
+    bottom : 50%;
+    left : 50%;
+    transform: translate(-50%, 590%);
+}
+.conveyor_belt_2_element {
+    width: 10%;
+    height: 100%;
+    // background-color: red;
+    position: absolute;
+    animation: moveRight 15s linear infinite; /* duration을 15초로 변경 */
+    opacity: 1;
+    img{
+        position: relative;
+        height: 80%;
+        width: 40%;
+        top: 50%;
+        left : 50%;
+        transform: translate(-50%, -50%);       
+    }
+}
+
+@for $i from 1 through $conveyor-count {
+    .conveyor_belt_2_element:nth-child(#{$i}) {
+        background-color: #E7E7E7;
+        border-radius: 5px;
+        animation-delay: ($i - 1) * $conveyor-delay;
+        right: calc(100% + #{$i - 1} * 10px); /* 간격을 포함한 계산 */
+        animation-fill-mode: forwards;
+    }
+}
+
+.conveyor_belt_2_element:nth-child(1) {
+     animation-delay: 0s;
+}
+
+@keyframes moveRight {
+    0% {
+        right: 100%;
+    }
+    100% {
+        right: -200px;
+    }
+}
