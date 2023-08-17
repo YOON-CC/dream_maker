@@ -1,203 +1,171 @@
 'use client'
-import Image from 'next/image';
-import styles from './page.module.scss'; 
-import React, { useEffect, useState, useRef  } from 'react';
-import Konva from 'konva';''
 
-
-
-const KonvaDemo: React.FC = () => {
-  const stageRef = useRef<Konva.Stage | null>(null);
-  const layerRef = useRef<Konva.Layer | null>(null);
-  const trRef = useRef<Konva.Transformer | null>(null);
-  const selectionRectangleRef = useRef<Konva.Rect | null>(null);
-
-  useEffect(() => {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    const stage = new Konva.Stage({
-      container: 'container',
-      width: 1000,
-      height: 500,
-    });
-    stageRef.current = stage;
-
-    const layer = new Konva.Layer();
-    stage.add(layer);
-    layerRef.current = layer;
-
-    const tr = new Konva.Transformer();
-    layer.add(tr);
-    trRef.current = tr;
-
-    const selectionRectangle = new Konva.Rect({
-      fill: 'rgba(0,0,255,0.5)',
-      visible: false,
-    });
-    layer.add(selectionRectangle);
-    selectionRectangleRef.current = selectionRectangle;
-
-    let x1: number, y1: number, x2: number, y2: number;
-
-    const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
-      if (e.target !== stageRef.current) {
-        return;
-      }
-      e.evt.preventDefault();
-      x1 = stageRef.current?.getPointerPosition()?.x || 0;
-      y1 = stageRef.current?.getPointerPosition()?.y || 0;
-      x2 = stageRef.current?.getPointerPosition()?.x || 0;
-      y2 = stageRef.current?.getPointerPosition()?.y || 0;
-
-      selectionRectangleRef.current?.visible(true);
-      selectionRectangleRef.current?.width(0);
-      selectionRectangleRef.current?.height(0);
-    };
-
-    const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
-      if (!selectionRectangleRef.current?.visible()) {
-        return;
-      }
-      e.evt.preventDefault();
-      x2 = stageRef.current?.getPointerPosition()?.x || 0;
-      y2 = stageRef.current?.getPointerPosition()?.y || 0;
-
-      selectionRectangleRef.current?.setAttrs({
-        x: Math.min(x1, x2),
-        y: Math.min(y1, y2),
-        width: Math.abs(x2 - x1),
-        height: Math.abs(y2 - y1),
-      });
-    };
-
-    const handleMouseUp = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
-      if (!selectionRectangleRef.current?.visible()) {
-        return;
-      }
-      e.evt.preventDefault();
-      setTimeout(() => {
-        selectionRectangleRef.current?.visible(false);
-      });
-
-      const shapes = layerRef.current?.find('.rect') as Konva.Shape[];
-      const box = selectionRectangleRef.current?.getClientRect();
-      const selected = shapes.filter((shape) =>
-        Konva.Util.haveIntersection(box, shape.getClientRect())
-      );
-      trRef.current?.nodes(selected);
-    };
-
-    const handleClick = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
-      if (selectionRectangleRef.current?.visible()) {
-        return;
-      }
-
-      if (e.target === stageRef.current) {
-        trRef.current?.nodes([]);
-        return;
-      }
-
-      const target = e.target as Konva.Node;
-      if (!target.hasName('rect')) {
-        return;
-      }
-
-      const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
-      const isSelected = trRef.current?.nodes().indexOf(target) ?? -1;
-
-      if (!metaPressed && isSelected === -1) {
-        trRef.current?.nodes([target]);
-      } else if (metaPressed && isSelected >= 0) {
-        const nodes = trRef.current?.nodes().slice() ?? [];
-        nodes.splice(nodes.indexOf(target), 1);
-        trRef.current?.nodes(nodes);
-      } else if (metaPressed && isSelected === -1) {
-        const nodes = trRef.current?.nodes().concat([target]) ?? [];
-        trRef.current?.nodes(nodes);
-      }
-    };
-
-    stageRef.current?.on('mousedown touchstart', handleMouseDown);
-    stageRef.current?.on('mousemove touchmove', handleMouseMove);
-    stageRef.current?.on('mouseup touchend', handleMouseUp);
-    stageRef.current?.on('click tap', handleClick);
-  }, []);
-
-  const handleAddRect = () => {
-    const newRect = new Konva.Rect({
-      x: Math.random() * 800,
-      y: Math.random() * 400,
-      width: Math.random() * 100 + 50,
-      height: Math.random() * 100 + 50,
-      fill: '#' + Math.floor(Math.random() * 16777215).toString(16),
-      draggable: true,
-      name: 'rect',
-    });
-
-    layerRef.current?.add(newRect);
-    layerRef.current?.batchDraw();
-  };
-
-  const handleAddCircle = () => {
-    const newCircle = new Konva.Circle({
-      x: Math.random() * 800,
-      y: Math.random() * 400,
-      radius: Math.random() * 50 + 25,
-      fill: '#' + Math.floor(Math.random() * 16777215).toString(16),
-      draggable: true,
-      name: 'rect',
-    });
-
-    layerRef.current?.add(newCircle);
-    layerRef.current?.batchDraw();
-  };
-
-  const handleAddTriangle = () => {
-    const newTriangle = new Konva.RegularPolygon({
-      x: Math.random() * 800,
-      y: Math.random() * 400,
-      sides: 3,
-      radius: Math.random() * 50 + 25,
-      fill: '#' + Math.floor(Math.random() * 16777215).toString(16),
-      draggable: true,
-      name: 'rect',
-    });
-
-    layerRef.current?.add(newTriangle);
-    layerRef.current?.batchDraw();
-  };
-
-  return (
-    <div>
-      <button onClick={handleAddRect}>Add Rectangle</button>
-      <button onClick={handleAddCircle}>Add Circle</button>
-      <button onClick={handleAddTriangle}>Add Triangle</button>
-      <div id="container"></div>
-    </div>
-  );
-};
-
+import styles from './page.module.scss';
+import React, { useEffect, useRef } from 'react';
+import { fabric } from 'fabric';
 
 
 const Editor = () => {
-    return (
-        <div className={styles['editor_body']}>
-            <div className={styles['tool_container_left']}>
-                <div className={styles['tool_container_left_menu']}>
-                    <div className={styles['tool_container_left_menu_flex']}></div>
-                    <div className={styles['tool_container_left_menu_flex']}></div>
-                    <div className={styles['tool_container_left_menu_flex']}></div>
-                    <div className={styles['tool_container_left_menu_flex']}></div>
-                    <div className={styles['tool_container_left_menu_flex']}></div>
-                </div>
-            </div>
-            <div className={styles['canvas_container']}>
-                <KonvaDemo></KonvaDemo>
-            </div>
-            <div className={styles['tool_container_right']}></div>
-        </div>
-    );
-}
+  const canvasRef = useRef(null);
+
+  useEffect(() => { 
+    if (canvasRef.current) {
+      const canvas = new fabric.Canvas(canvasRef.current);
+
+      const handleAddRect = () => {
+        const newRect = new fabric.Rect({
+          left: Math.random() * 400,
+          top: Math.random() * 400,
+          width: 100,
+          height: 100,
+          fill: '#' + Math.floor(Math.random() * 16777215).toString(16),
+        });
+
+        canvas.add(newRect);
+      };
+
+      const handleAddCircle = () => {
+        const newCircle = new fabric.Circle({
+          left: Math.random() * 400,
+          top: Math.random() * 400,
+          radius: 50,
+          fill: '#' + Math.floor(Math.random() * 16777215).toString(16),
+        });
+
+        canvas.add(newCircle);
+      };
+
+      const handleAddTriangle = () => {
+        const newTriangle = new fabric.Triangle({
+          left: Math.random() * 400,
+          top: Math.random() * 400,
+          width: 100,
+          height: 100,
+          fill: '#' + Math.floor(Math.random() * 16777215).toString(16),
+        });
+
+        canvas.add(newTriangle);
+      };
+
+      const handleChangeColor = () => {
+        const activeObject = canvas.getActiveObject();
+        if (activeObject) {
+          const newColor = prompt('Enter RGB color (e.g. "255, 0, 0"):');
+          if (newColor) {
+            activeObject.set('fill', `rgb(${newColor})`);
+            canvas.renderAll();
+          }
+        }
+      };
+      const handleAddTextbox = () => {
+        const newTextbox = new fabric.Textbox('Enter your text', {
+          left: Math.random() * 400,
+          top: Math.random() * 400,
+          width: 150,
+          fontSize: 20,
+          fill: '#' + Math.floor(Math.random() * 16777215).toString(16),
+          editable: true, 
+        });
+
+        canvas.add(newTextbox);
+        canvas.setActiveObject(newTextbox); 
+        canvas.renderAll(); 
+      };
+      const handleDeleteSelectedObjects = () => {
+        const selectedObjects = canvas.getActiveObjects();
+        if (selectedObjects.length > 0) {
+          selectedObjects.forEach(object => {
+            canvas.remove(object);
+          });
+          canvas.discardActiveObject(); 
+          canvas.renderAll(); 
+        }
+      };
+
+      const handleKeyboardDelete = (event: KeyboardEvent) => {
+        if (event.key === 'Delete') {
+          handleDeleteSelectedObjects();
+        }
+      };
+      const handleSendBackwards = () => {
+        const activeObject = canvas.getActiveObject();
+        if (activeObject) {
+          canvas.sendBackwards(activeObject);
+        }
+      };
+
+      const handleBringForward = () => {
+        const activeObject = canvas.getActiveObject();
+        if (activeObject) {
+          canvas.bringForward(activeObject);
+        }
+      };
+
+      
+
+      
+
+      document.addEventListener('keydown', handleKeyboardDelete);
+
+      const addButton = document.getElementById('add-button');
+      addButton?.addEventListener('click', handleAddRect);
+
+      const addCircleButton = document.getElementById('add-circle-button');
+      addCircleButton?.addEventListener('click', handleAddCircle);
+
+      const addTriangleButton = document.getElementById('add-triangle-button');
+      addTriangleButton?.addEventListener('click', handleAddTriangle);
+
+      const changeColorButton = document.getElementById('change-color-button');
+      changeColorButton?.addEventListener('click', handleChangeColor);
+
+      const addTextboxButton = document.getElementById('add-textbox-button');
+      addTextboxButton?.addEventListener('click', handleAddTextbox);
+
+      const deleteButton = document.getElementById('delete-button');
+      deleteButton?.addEventListener('click', handleDeleteSelectedObjects);
+
+      const sendBackwardsButton = document.getElementById('send-backwards-button');
+      sendBackwardsButton?.addEventListener('click', handleSendBackwards);
+
+      const bringForwardButton = document.getElementById('bring-forward-button');
+      bringForwardButton?.addEventListener('click', handleBringForward);
+
+      
+
+      return () => {
+        document.removeEventListener('keydown', handleKeyboardDelete);
+        addButton?.removeEventListener('click', handleAddRect);
+        addCircleButton?.removeEventListener('click', handleAddCircle);
+        addTriangleButton?.removeEventListener('click', handleAddTriangle);
+        changeColorButton?.removeEventListener('click', handleChangeColor);
+        addTextboxButton?.removeEventListener('click', handleAddTextbox);
+        deleteButton?.removeEventListener('click', handleDeleteSelectedObjects);
+        sendBackwardsButton?.removeEventListener('click', handleSendBackwards);
+        bringForwardButton?.removeEventListener('click', handleBringForward);
+      };
+    }
+  }, []);
+
+  return (
+    <div className={styles['editor_body']}>
+      <div className={styles['tool_container_left']}>
+
+      </div>
+      <div className={styles['canvas_container']}>
+        <canvas ref={canvasRef} width={1000} height={500}></canvas>
+        <button id="add-button">Add Rectangle</button>
+        <button id="add-circle-button">Add Circle</button>
+        <button id="add-triangle-button">Add Triangle</button>
+        <button id="change-color-button">Change Color</button>
+        <button id="add-textbox-button">Add Textbox</button>
+        <button id="delete-button">Delete Selected Objects</button>
+        <button id="send-backwards-button">Send Backwards</button>
+        <button id="bring-forward-button">Bring Forward</button>
+      </div>
+      <div className={styles['tool_container_right']}></div>
+    </div>
+  );
+};
 
 export default Editor;
