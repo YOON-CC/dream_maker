@@ -1,16 +1,26 @@
 'use client'
 
 import styles from './page.module.scss';
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { fabric } from 'fabric';
 
 
 const Editor = () => {
   const canvasRef = useRef(null);
+  const [objectCoordinates, setObjectCoordinates] = useState({ x: 0, y: 0 });
+
 
   useEffect(() => { 
     if (canvasRef.current) {
       const canvas = new fabric.Canvas(canvasRef.current);
+
+      canvas.on('object:moving', (e) => {
+        const activeObject = e.target as fabric.Object;
+        
+        if (activeObject.left !== undefined && activeObject.top !== undefined) {
+          setObjectCoordinates({ x: activeObject.left, y: activeObject.top });
+        }
+      });
 
       const handleAddRect = () => {
         const newRect = new fabric.Rect({
@@ -101,9 +111,20 @@ const Editor = () => {
         }
       };
 
-      
+      const handleAddImageShape = () => {
+        const imageUrl = prompt('Enter image URL:');
+        if (imageUrl) {
+          fabric.Image.fromURL(imageUrl, (img) => {
+            img.set({
+              left: Math.random() * 400,
+              top: Math.random() * 400,
+            });
 
-      
+            canvas.add(img);
+          });
+        }
+      };
+   
 
       document.addEventListener('keydown', handleKeyboardDelete);
 
@@ -131,9 +152,13 @@ const Editor = () => {
       const bringForwardButton = document.getElementById('bring-forward-button');
       bringForwardButton?.addEventListener('click', handleBringForward);
 
-      
+      const addImageShapeButton = document.getElementById('add-image-shape-button');
+      addImageShapeButton?.addEventListener('click', handleAddImageShape);
 
       return () => {
+        canvas.off('object:moving');
+        addImageShapeButton?.removeEventListener('click', handleAddImageShape);
+
         document.removeEventListener('keydown', handleKeyboardDelete);
         addButton?.removeEventListener('click', handleAddRect);
         addCircleButton?.removeEventListener('click', handleAddCircle);
@@ -162,6 +187,9 @@ const Editor = () => {
         <button id="delete-button">Delete Selected Objects</button>
         <button id="send-backwards-button">Send Backwards</button>
         <button id="bring-forward-button">Bring Forward</button>
+        <button id="add-image-shape-button">Add Image Shape</button>
+
+        <p>Object Coordinates: X: {objectCoordinates.x.toFixed(2)}, Y: {objectCoordinates.y.toFixed(2)}</p>
       </div>
       <div className={styles['tool_container_right']}></div>
     </div>
