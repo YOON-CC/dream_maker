@@ -6,10 +6,77 @@ import { fabric } from 'fabric';
 
 
 const Editor = () => {
-  const canvasRef = useRef(null);
+  // const canvasRef = useRef(null);
   const [objectCoordinates, setObjectCoordinates] = useState({ x: 0, y: 0 });
   const [objectSize, setObjectSize] = useState({ width: 0, height: 0 });
 
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
+
+  //다운로드 버튼
+  const handleDownloadCanvasAsImage = () => {
+    if (canvas) {
+      const canvasObjects = canvas.getObjects();
+      const canvasWidth = window.innerWidth; // 화면 너비에 맞게 설정
+      const canvasHeight = window.innerHeight; // 화면 높이에 맞게 설정
+      // console.log(canvasWidth, canvasHeight)
+      
+      // Canvas 내용을 저장할 HTML 문자열 초기화
+      let htmlContent = '<!DOCTYPE html><html><head><title>Canvas Content</title></head><body>';
+  
+      // 각 객체를 순회하면서 HTML로 변환
+      canvasObjects.forEach(object => {
+        if (object instanceof fabric.Rect) {
+          // Fabric.js에서 사각형 객체인 경우
+
+          const originalLeft = object.left?? 0; // 부모 태그로부터의 left
+          const originalTop = object.top ?? 0; // 부모 태그로부터의 top
+          
+          const angleInDegrees = - (object.angle?? 0); // 회전 각도
+          const angleInRadians = (angleInDegrees * Math.PI) / 180;
+          
+          // 회전 중심을 div 태그의 중심으로 설정
+          const centerX = object.getCenterPoint().x;
+          const centerY = object.getCenterPoint().y;
+          
+          // 회전 변환 후의 left와 top 계산
+          const newX = centerX + (originalLeft - centerX) * Math.cos(angleInRadians) - (originalTop - centerY) * Math.sin(angleInRadians);
+          const newY = centerY + (originalLeft - centerX) * Math.sin(angleInRadians) + (originalTop - centerY) * Math.cos(angleInRadians);
+          
+          console.log(`회전 후의 left: ${newX}, top: ${newY}`);
+          const ol = (newX ?? 0) / 1000 * 100
+          const ot = (newY ?? 0) / 500 * 100
+          const ow = (object.width ?? 0) / 1000 * 100
+          const oh = (object.height ?? 0) / 500 * 100
+
+          const rectHtml = `<div style="position: absolute; left: ${ol}%; top: ${ot}%; width: ${ow}%; height: ${oh}%; background-color: ${object.fill}; transform: rotate(${object.angle}deg);"></div>`;          
+          htmlContent += rectHtml;
+        }
+        if (object instanceof fabric.Circle && typeof object.radius !== 'undefined') {
+          // Fabric.js에서 원 객체인 경우
+          const circleHtml = `<div style="position: absolute; left: ${object.left}px; top: ${object.top}px; width: ${object.radius * 2}px; height: ${object.radius * 2}px; background-color: ${object.fill}; border-radius: 50%;"></div>`;
+          htmlContent += circleHtml;
+        }
+        
+        // 다른 객체 유형처리 ▼▼▼▼
+      });
+  
+      htmlContent += '</body></html>';
+  
+      // HTML 파일로 저장
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+  
+      // 다운로드 링크 생성, 클릭 이벤트 발생
+      const downloadLink = document.createElement('a');
+      downloadLink.href = url;
+      downloadLink.download = 'canvas_content.html';
+      downloadLink.click();
+  
+      // URL 객체 해제
+      URL.revokeObjectURL(url);
+    }
+  };
 
   useEffect(() => { 
     if (canvasRef.current) {
@@ -208,6 +275,9 @@ const Editor = () => {
       const addImageShapeButton = document.getElementById('add-image-shape-button');
       addImageShapeButton?.addEventListener('click', handleAddImageShape);
 
+
+      setCanvas(canvas);
+
       return () => {
         canvas.off('object:moving');
         addImageShapeButton?.removeEventListener('click', handleAddImageShape);
@@ -250,7 +320,7 @@ const Editor = () => {
         <button id="change-radius-input-button">Change Radius (Input)</button>
         <p>Object Coordinates: X: {objectCoordinates.x.toFixed(2)}, Y: {objectCoordinates.y.toFixed(2)}</p>
         <p>Object size: Width: {objectSize.width.toFixed(2)}, Object size : : {objectSize.height.toFixed(2)}</p>
-
+        <button onClick={handleDownloadCanvasAsImage}>Canvas 다운로드</button>
       </div>
       <div className={styles['tool_container_right']}></div>
     </div>

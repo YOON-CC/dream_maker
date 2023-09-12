@@ -39,8 +39,8 @@
 .canvas_container{
     position: absolute;
     background-color: #ffffff;
-    width: 1000px;
-    height: 500px;
+    width: fit-content;
+    height: fit-content;
     @include center_position()
 }
 
