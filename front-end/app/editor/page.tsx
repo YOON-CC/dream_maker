@@ -17,8 +17,7 @@ const Editor = () => {
   const handleDownloadCanvasAsImage = () => {
     if (canvas) {
       const canvasObjects = canvas.getObjects();
-      const canvasWidth = window.innerWidth; // 화면 너비에 맞게 설정
-      const canvasHeight = window.innerHeight; // 화면 높이에 맞게 설정
+
       // console.log(canvasWidth, canvasHeight)
       
       // Canvas 내용을 저장할 HTML 문자열 초기화
@@ -54,7 +53,26 @@ const Editor = () => {
         }
         if (object instanceof fabric.Circle && typeof object.radius !== 'undefined') {
           // Fabric.js에서 원 객체인 경우
-          const circleHtml = `<div style="position: absolute; left: ${object.left}px; top: ${object.top}px; width: ${object.radius * 2}px; height: ${object.radius * 2}px; background-color: ${object.fill}; border-radius: 50%;"></div>`;
+          const originalLeft = object.left?? 0; // 부모 태그로부터의 left
+          const originalTop = object.top ?? 0; // 부모 태그로부터의 top
+          
+          const angleInDegrees = - (object.angle?? 0); // 회전 각도
+          const angleInRadians = (angleInDegrees * Math.PI) / 180;
+
+          const centerX = object.getCenterPoint().x;
+          const centerY = object.getCenterPoint().y;
+          
+          // 회전 변환 후의 left와 top 계산
+          const newX = centerX + (originalLeft - centerX) * Math.cos(angleInRadians) - (originalTop - centerY) * Math.sin(angleInRadians);
+          const newY = centerY + (originalLeft - centerX) * Math.sin(angleInRadians) + (originalTop - centerY) * Math.cos(angleInRadians);
+          
+          console.log(`회전 후의 left: ${newX}, top: ${newY}`);
+          const ol = (newX ?? 0) / 1000 * 100
+          const ot = (newY ?? 0) / 500 * 100
+          const ow = (object.width ?? 0) / 1000 * 100
+          const oh = (object.height ?? 0) / 500 * 100
+
+          const circleHtml = `<div style="position: absolute; left: ${ol}%; top: ${ot}%; width: ${ow}%; height: ${oh}%; background-color: ${object.fill}; border-radius: 50%;"></div>`;
           htmlContent += circleHtml;
         }
         
