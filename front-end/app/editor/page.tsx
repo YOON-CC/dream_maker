@@ -106,9 +106,10 @@ const Editor = () => {
 
           console.log("삼각형", originalLeft, originalTop)
           console.log("삼각형의 중심", centerX, centerY)
+          console.log("삼각형의 각도", angleInDegrees)
 
-          const circleHtml = `<div style="position: absolute; left: ${ol}%; top: ${ot}%; width: ${ow}%; height: ${oh}%; background-color: ${object.fill};"></div>`;
-          htmlContent += circleHtml;
+          const TriangleHtml = `<div style="position: absolute; left: ${ol}%; top: ${ot}%; width: ${ow}%; height: ${oh}%; background-color: ${object.fill}; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); transform: rotate(${object.angle}deg);"></div>`;
+          htmlContent += TriangleHtml;
         }
         
         // 다른 객체 유형처리 ▼▼▼▼
@@ -190,6 +191,32 @@ const Editor = () => {
       
           setObjectCoordinates({ x: left, y: top });
           setObjectSize({ width, height , rx, ry});
+      
+          canvas.renderAll();
+        }
+        
+      });
+
+      canvas.on('object:scaling', (e) => {
+        const activeObject = e.target as fabric.Triangle;
+      
+        if (activeObject instanceof fabric.Triangle) {
+          const scaleX = activeObject.scaleX ?? 1;
+          const scaleY = activeObject.scaleY ?? 1;
+          const width = activeObject.width ?? 0;
+          const height = activeObject.height ?? 0;
+          const left = activeObject.left ?? 0;
+          const top = activeObject.top ?? 0;
+
+          activeObject.set({
+            width: width * scaleX,
+            height: height * scaleY,
+            scaleX: 1,
+            scaleY: 1
+          });
+      
+          setObjectCoordinates({ x: left, y: top });
+          setObjectSize({ width, height });
       
           canvas.renderAll();
         }

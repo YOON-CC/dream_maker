@@ -41,18 +41,22 @@
     background-color: #ffffff;
     width: fit-content;
     height: fit-content;
-    @include center_position()
+    @include center_position();
+
+    z-index : 1;
+
 }
 
 .tool_container_right{
     position: absolute;
-    background-color: rgb(255, 255, 255);
+    background-color: #f4f4f4;
     height: 100%;
     width: 15%;
 
     top:50%;
     left:93%;
     transform: translate(-50%, -50%);
+    z-index : -0;
 }
 
 .dddd{
