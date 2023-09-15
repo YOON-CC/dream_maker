@@ -6,9 +6,16 @@ import { fabric } from 'fabric';
 
 
 const Editor = () => {
+  type ObjectSize = {
+    width?: number;
+    height?: number;
+    rx?: number;
+    ry?: number;
+    // 더 많은 프로퍼티를 여기에 추가
+  };
   // const canvasRef = useRef(null);
   const [objectCoordinates, setObjectCoordinates] = useState({ x: 0, y: 0 });
-  const [objectSize, setObjectSize] = useState({ width: 0, height: 0 });
+  const [objectSize, setObjectSize] = useState<ObjectSize>({});
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
@@ -48,10 +55,12 @@ const Editor = () => {
           const ow = (object.width ?? 0) / 1000 * 100
           const oh = (object.height ?? 0) / 500 * 100
 
+          console.log("사각형", originalLeft, originalTop)
+
           const rectHtml = `<div style="position: absolute; left: ${ol}%; top: ${ot}%; width: ${ow}%; height: ${oh}%; background-color: ${object.fill}; transform: rotate(${object.angle}deg);"></div>`;          
           htmlContent += rectHtml;
         }
-        if (object instanceof fabric.Circle && typeof object.radius !== 'undefined') {
+        if (object instanceof fabric.Ellipse && typeof object.rx !== 'undefined' && typeof object.ry !== 'undefined') {
           // Fabric.js에서 원 객체인 경우
           const originalLeft = object.left?? 0; // 부모 태그로부터의 left
           const originalTop = object.top ?? 0; // 부모 태그로부터의 top
@@ -73,6 +82,32 @@ const Editor = () => {
           const oh = (object.height ?? 0) / 500 * 100
 
           const circleHtml = `<div style="position: absolute; left: ${ol}%; top: ${ot}%; width: ${ow}%; height: ${oh}%; background-color: ${object.fill}; border-radius: 50%;"></div>`;
+          htmlContent += circleHtml;
+        }
+        if (object instanceof fabric.Triangle) {
+          // Fabric.js에서 원 객체인 경우
+          const originalLeft = object.left?? 0; // 부모 태그로부터의 left
+          const originalTop = object.top ?? 0; // 부모 태그로부터의 top
+          
+          const angleInDegrees = - (object.angle?? 0); // 회전 각도
+          const angleInRadians = (angleInDegrees * Math.PI) / 180;
+
+          const centerX = object.getCenterPoint().x;
+          const centerY = object.getCenterPoint().y;
+          
+          // 회전 변환 후의 left와 top 계산
+          const newX = centerX + (originalLeft - centerX) * Math.cos(angleInRadians) - (originalTop - centerY) * Math.sin(angleInRadians);
+          const newY = centerY + (originalLeft - centerX) * Math.sin(angleInRadians) + (originalTop - centerY) * Math.cos(angleInRadians);
+          
+          const ol = (newX ?? 0) / 1000 * 100
+          const ot = (newY ?? 0) / 500 * 100
+          const ow = (object.width ?? 0) / 1000 * 100
+          const oh = (object.height ?? 0) / 500 * 100
+
+          console.log("삼각형", originalLeft, originalTop)
+          console.log("삼각형의 중심", centerX, centerY)
+
+          const circleHtml = `<div style="position: absolute; left: ${ol}%; top: ${ot}%; width: ${ow}%; height: ${oh}%; background-color: ${object.fill};"></div>`;
           htmlContent += circleHtml;
         }
         
@@ -101,6 +136,7 @@ const Editor = () => {
       const canvas = new fabric.Canvas(canvasRef.current);
 
       
+      //크기 상태값 변화
       canvas.on('object:scaling', (e) => {
         const activeObject = e.target as fabric.Rect;
       
@@ -126,6 +162,38 @@ const Editor = () => {
       
           canvas.renderAll();
         }
+        
+      });
+
+      canvas.on('object:scaling', (e) => {
+        const activeObject = e.target as fabric.Ellipse;
+      
+        if (activeObject instanceof fabric.Ellipse) {
+          const scaleX = activeObject.scaleX ?? 1;
+          const scaleY = activeObject.scaleY ?? 1;
+          const width = activeObject.width ?? 0;
+          const height = activeObject.height ?? 0;
+          const rx = activeObject.rx ?? 0;
+          const ry = activeObject.ry ?? 0;
+          const left = activeObject.left ?? 0;
+          const top = activeObject.top ?? 0;
+      
+          console.log(width*scaleX, height*scaleY, rx, ry, scaleX, scaleY)
+          activeObject.set({
+            width: width * scaleX,
+            height: height * scaleY,
+            rx : rx*scaleX,
+            ry : ry*scaleY,
+            scaleX: 1,
+            scaleY: 1
+          });
+      
+          setObjectCoordinates({ x: left, y: top });
+          setObjectSize({ width, height , rx, ry});
+      
+          canvas.renderAll();
+        }
+        
       });
       
       
@@ -143,10 +211,11 @@ const Editor = () => {
       };
 
       const handleAddCircle = () => {
-        const newCircle = new fabric.Circle({
+        const newCircle = new fabric.Ellipse({
           left: Math.random() * 400,
           top: Math.random() * 400,
-          radius: 50,
+          rx: 50, // 가로 반지름
+          ry: 50, // 세로 반지름
           fill: '#' + Math.floor(Math.random() * 16777215).toString(16),
         });
 
@@ -257,6 +326,7 @@ const Editor = () => {
           activeObject.set('ry', newRy);
           canvas.renderAll();
         }
+        
       };
       const changeRadiusInputButton = document.getElementById('change-radius-input-button');
       changeRadiusInputButton?.addEventListener('click', handleChangeRadiusInput);
@@ -337,7 +407,7 @@ const Editor = () => {
         <button id="add-image-shape-button">Add Image Shape</button>
         <button id="change-radius-input-button">Change Radius (Input)</button>
         <p>Object Coordinates: X: {objectCoordinates.x.toFixed(2)}, Y: {objectCoordinates.y.toFixed(2)}</p>
-        <p>Object size: Width: {objectSize.width.toFixed(2)}, Object size : : {objectSize.height.toFixed(2)}</p>
+        <p> Object size: Width: {objectSize.width !== undefined ? objectSize.width.toFixed(2) : "N/A"}, Height: {objectSize.height !== undefined ? objectSize.height.toFixed(2) : "N/A"}</p>
         <button onClick={handleDownloadCanvasAsImage}>Canvas 다운로드</button>
       </div>
       <div className={styles['tool_container_right']}></div>
